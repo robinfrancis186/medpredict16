@@ -1,13 +1,12 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { PatientRegistrationForm } from '@/components/PatientRegistrationForm';
+import { PatientSearchFilters, PatientFilters } from '@/components/PatientSearchFilters';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { RiskBadge } from '@/components/RiskBadge';
 import {
-  Search,
   Plus,
   ChevronRight,
   AlertCircle,
@@ -31,7 +30,11 @@ interface Patient {
 export default function Patients() {
   const [patients, setPatients] = useState<Patient[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [searchQuery, setSearchQuery] = useState('');
+  const [filters, setFilters] = useState<PatientFilters>({
+    searchQuery: '',
+    bloodGroup: 'all',
+    riskLevel: 'all',
+  });
   const [showRegistration, setShowRegistration] = useState(false);
 
   const fetchPatients = async () => {
@@ -55,12 +58,6 @@ export default function Patients() {
     fetchPatients();
   }, []);
 
-  const filteredPatients = patients.filter((patient) =>
-    patient.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    patient.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    (patient.patient_id && patient.patient_id.toLowerCase().includes(searchQuery.toLowerCase()))
-  );
-
   // Calculate risk level based on conditions and allergies
   const getRiskLevel = (patient: Patient): 'low' | 'medium' | 'high' => {
     const riskFactors = patient.allergies.length + patient.chronic_conditions.length;
@@ -68,6 +65,27 @@ export default function Patients() {
     if (riskFactors >= 1) return 'medium';
     return 'low';
   };
+
+  const filteredPatients = useMemo(() => {
+    return patients.filter((patient) => {
+      // Search filter (name or patient ID)
+      const searchMatch =
+        filters.searchQuery === '' ||
+        patient.name.toLowerCase().includes(filters.searchQuery.toLowerCase()) ||
+        patient.id.toLowerCase().includes(filters.searchQuery.toLowerCase()) ||
+        (patient.patient_id && patient.patient_id.toLowerCase().includes(filters.searchQuery.toLowerCase()));
+
+      // Blood group filter
+      const bloodGroupMatch =
+        filters.bloodGroup === 'all' || patient.blood_group === filters.bloodGroup;
+
+      // Risk level filter
+      const patientRisk = getRiskLevel(patient);
+      const riskMatch = filters.riskLevel === 'all' || patientRisk === filters.riskLevel;
+
+      return searchMatch && bloodGroupMatch && riskMatch;
+    });
+  }, [patients, filters]);
 
   return (
     <DashboardLayout>
@@ -79,7 +97,7 @@ export default function Patients() {
               Patient Directory
             </h1>
             <p className="text-muted-foreground mt-1">
-              {patients.length} patients in the system
+              {filteredPatients.length} of {patients.length} patients
             </p>
           </div>
           <Button variant="medical" onClick={() => setShowRegistration(true)}>
@@ -88,16 +106,8 @@ export default function Patients() {
           </Button>
         </div>
 
-        {/* Search */}
-        <div className="relative max-w-md">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-          <Input
-            placeholder="Search by name or ID..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-10"
-          />
-        </div>
+        {/* Search and Filters */}
+        <PatientSearchFilters onFiltersChange={setFilters} />
 
         {/* Patient list */}
         <div className="bg-card rounded-xl border border-border shadow-soft overflow-hidden">
@@ -179,7 +189,9 @@ export default function Patients() {
               <div className="text-center py-12">
                 <Users className="w-12 h-12 mx-auto text-muted-foreground/50 mb-4" />
                 <p className="text-muted-foreground">
-                  {searchQuery ? 'No patients found matching your search' : 'No patients registered yet'}
+                  {filters.searchQuery || filters.bloodGroup !== 'all' || filters.riskLevel !== 'all'
+                    ? 'No patients found matching your filters'
+                    : 'No patients registered yet'}
                 </p>
                 <Button variant="outline" className="mt-4" onClick={() => setShowRegistration(true)}>
                   <Plus className="w-4 h-4 mr-2" />
