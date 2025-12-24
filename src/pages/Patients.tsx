@@ -18,6 +18,7 @@ import {
 
 interface Patient {
   id: string;
+  patient_id: string | null;
   name: string;
   age: number;
   gender: string;
@@ -56,7 +57,8 @@ export default function Patients() {
 
   const filteredPatients = patients.filter((patient) =>
     patient.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    patient.id.toLowerCase().includes(searchQuery.toLowerCase())
+    patient.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    (patient.patient_id && patient.patient_id.toLowerCase().includes(searchQuery.toLowerCase()))
   );
 
   // Calculate risk level based on conditions and allergies
@@ -132,7 +134,7 @@ export default function Patients() {
                       </div>
                       <div>
                         <p className="font-medium text-foreground">{patient.name}</p>
-                        <p className="text-xs text-muted-foreground">ID: {patient.id.slice(0, 8)}...</p>
+                        <p className="text-xs text-muted-foreground font-mono">{patient.patient_id || 'ID pending'}</p>
                       </div>
                     </div>
 

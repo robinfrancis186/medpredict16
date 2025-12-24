@@ -371,6 +371,7 @@ export type Database = {
           gender: Database["public"]["Enums"]["gender_type"]
           id: string
           name: string
+          patient_id: string | null
           phone: string | null
           updated_at: string
         }
@@ -389,6 +390,7 @@ export type Database = {
           gender: Database["public"]["Enums"]["gender_type"]
           id?: string
           name: string
+          patient_id?: string | null
           phone?: string | null
           updated_at?: string
         }
@@ -407,6 +409,7 @@ export type Database = {
           gender?: Database["public"]["Enums"]["gender_type"]
           id?: string
           name?: string
+          patient_id?: string | null
           phone?: string | null
           updated_at?: string
         }
