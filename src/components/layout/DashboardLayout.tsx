@@ -5,6 +5,7 @@ import { cn } from '@/lib/utils';
 import { ClinicalDisclaimer } from '@/components/ClinicalDisclaimer';
 import { NotificationBell } from '@/components/NotificationBell';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import {
   LayoutDashboard,
   Users,
@@ -18,10 +19,19 @@ import {
   ChevronRight,
   Calendar,
   TestTube,
+  Stethoscope,
+  UserCog,
 } from 'lucide-react';
 
 interface DashboardLayoutProps {
   children: ReactNode;
+}
+
+interface NavItem {
+  name: string;
+  href: string;
+  icon: React.ElementType;
+  roles: ('doctor' | 'nurse')[];
 }
 
 export function DashboardLayout({ children }: DashboardLayoutProps) {
@@ -35,17 +45,44 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
     navigate('/auth');
   };
 
-  const navigation = [
-    { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
-    { name: 'Patients', href: '/patients', icon: Users },
-    { name: 'Scan Analysis', href: '/analysis', icon: Scan },
-    { name: 'Vitals Monitor', href: '/vitals', icon: Activity },
-    { name: 'Lab Results', href: '/lab-results', icon: TestTube },
-    { name: 'Appointments', href: '/appointments', icon: Calendar },
-    { name: 'Records', href: '/records', icon: FileText },
+  // Define navigation with role-based access
+  const allNavigation: NavItem[] = [
+    { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard, roles: ['doctor', 'nurse'] },
+    { name: 'Patients', href: '/patients', icon: Users, roles: ['doctor', 'nurse'] },
+    { name: 'Scan Analysis', href: '/analysis', icon: Scan, roles: ['doctor', 'nurse'] },
+    { name: 'Vitals Monitor', href: '/vitals', icon: Activity, roles: ['doctor', 'nurse'] },
+    { name: 'Lab Results', href: '/lab-results', icon: TestTube, roles: ['doctor', 'nurse'] },
+    { name: 'Appointments', href: '/appointments', icon: Calendar, roles: ['doctor', 'nurse'] },
+    { name: 'Records', href: '/records', icon: FileText, roles: ['doctor', 'nurse'] },
   ];
 
+  // Filter navigation based on user role
+  const navigation = allNavigation.filter(item => 
+    role && item.roles.includes(role as 'doctor' | 'nurse')
+  );
+
   const isActive = (path: string) => location.pathname.startsWith(path);
+
+  const getRoleBadge = () => {
+    switch (role) {
+      case 'doctor':
+        return (
+          <Badge className="bg-primary/20 text-primary border-primary/30 gap-1">
+            <Stethoscope className="w-3 h-3" />
+            Doctor
+          </Badge>
+        );
+      case 'nurse':
+        return (
+          <Badge className="bg-chart-2/20 text-chart-2 border-chart-2/30 gap-1">
+            <UserCog className="w-3 h-3" />
+            Nurse
+          </Badge>
+        );
+      default:
+        return null;
+    }
+  };
 
   return (
     <div className="min-h-screen bg-background flex">
@@ -72,7 +109,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
             </div>
             <div>
               <h1 className="font-display font-bold text-foreground">MedPredict</h1>
-              <p className="text-xs text-muted-foreground">Medical Platform</p>
+              <p className="text-xs text-muted-foreground">Staff Portal</p>
             </div>
             <button
               onClick={() => setSidebarOpen(false)}
@@ -82,8 +119,13 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
             </button>
           </div>
 
+          {/* Role indicator */}
+          <div className="px-4 py-3 border-b border-border">
+            {getRoleBadge()}
+          </div>
+
           {/* Navigation */}
-          <nav className="flex-1 px-3 py-4 space-y-1">
+          <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
             {navigation.map((item) => (
               <Link
                 key={item.name}
@@ -112,8 +154,10 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
                 </span>
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-foreground truncate">{profile?.full_name || 'User'}</p>
-                <p className="text-xs text-muted-foreground capitalize">{role || 'Staff'}</p>
+                <p className="text-sm font-medium text-foreground truncate">
+                  {role === 'doctor' ? 'Dr. ' : ''}{profile?.full_name || 'User'}
+                </p>
+                <p className="text-xs text-muted-foreground truncate">{profile?.email}</p>
               </div>
             </div>
             <Button
@@ -142,9 +186,9 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
             <div className="flex-1" />
             <div className="flex items-center gap-4">
               <NotificationBell />
-              <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <Activity className="w-4 h-4 text-risk-low" />
-                <span>System Online</span>
+              <div className="hidden sm:flex items-center gap-2 text-sm text-muted-foreground">
+                <Activity className="w-4 h-4 text-chart-2" />
+                <span>Online</span>
               </div>
             </div>
           </div>
