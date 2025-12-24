@@ -5,6 +5,7 @@ import { RiskBadge } from '@/components/RiskBadge';
 import { ClinicalDisclaimer } from '@/components/ClinicalDisclaimer';
 import { VitalsChart } from '@/components/VitalsChart';
 import { PatientLinkDialog } from '@/components/PatientLinkDialog';
+import { PatientEditDialog } from '@/components/PatientEditDialog';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { supabase } from '@/integrations/supabase/client';
@@ -28,6 +29,7 @@ import {
   Share2,
   Calendar,
   Loader2,
+  Pencil,
   TrendingUp,
   Link2,
 } from 'lucide-react';
@@ -95,6 +97,7 @@ export default function PatientDetail() {
   const [isLoading, setIsLoading] = useState(true);
   const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
   const [showLinkDialog, setShowLinkDialog] = useState(false);
+  const [showEditDialog, setShowEditDialog] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -289,6 +292,10 @@ export default function PatientDetail() {
             <p className="text-muted-foreground font-mono">{patient.patient_id || 'ID pending'}</p>
           </div>
           <div className="flex gap-2">
+            <Button variant="outline" size="sm" onClick={() => setShowEditDialog(true)}>
+              <Pencil className="w-4 h-4 mr-2" />
+              Edit
+            </Button>
             <Button variant="outline" size="sm" onClick={() => setShowLinkDialog(true)}>
               <Link2 className="w-4 h-4 mr-2" />
               Link Account
@@ -312,6 +319,21 @@ export default function PatientDetail() {
             </Button>
           </div>
         </div>
+
+        {/* Patient Edit Dialog */}
+        <PatientEditDialog
+          open={showEditDialog}
+          onOpenChange={setShowEditDialog}
+          patient={patient}
+          onSuccess={() => {
+            supabase
+              .from('patients')
+              .select('*')
+              .eq('id', id)
+              .maybeSingle()
+              .then(({ data }) => setPatient(data));
+          }}
+        />
 
         {/* Patient Link Dialog */}
         <PatientLinkDialog
