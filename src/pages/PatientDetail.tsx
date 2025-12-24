@@ -32,6 +32,7 @@ import {
 
 interface Patient {
   id: string;
+  patient_id: string | null;
   name: string;
   age: number;
   gender: string;
@@ -282,7 +283,7 @@ export default function PatientDetail() {
           </Button>
           <div className="flex-1">
             <h1 className="text-2xl font-display font-bold text-foreground">{patient.name}</h1>
-            <p className="text-muted-foreground">Patient ID: {patient.id.slice(0, 8)}...</p>
+            <p className="text-muted-foreground font-mono">{patient.patient_id || 'ID pending'}</p>
           </div>
           <div className="flex gap-2">
             <Button variant="outline" size="sm">

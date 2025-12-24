@@ -27,6 +27,7 @@ import { cn } from '@/lib/utils';
 
 interface PatientData {
   id: string;
+  patient_id: string;
   name: string;
   age: number;
   gender: string;
@@ -121,12 +122,34 @@ export default function PatientPortal() {
     if (!user) return;
     setLoading(true);
 
-    // Fetch patient record linked to this user
-    const { data: patientRecord } = await supabase
+    // First try to find patient linked by user ID
+    let { data: patientRecord } = await supabase
       .from('patients')
       .select('*')
       .eq('created_by', user.id)
-      .single();
+      .maybeSingle();
+
+    // If not found, try to find by email and link it
+    if (!patientRecord && user.email) {
+      const { data: patientByEmail } = await supabase
+        .from('patients')
+        .select('*')
+        .ilike('email', user.email)
+        .is('created_by', null)
+        .maybeSingle();
+
+      if (patientByEmail) {
+        // Link this patient to the current user
+        const { error } = await supabase
+          .from('patients')
+          .update({ created_by: user.id })
+          .eq('id', patientByEmail.id);
+
+        if (!error) {
+          patientRecord = { ...patientByEmail, created_by: user.id };
+        }
+      }
+    }
 
     if (patientRecord) {
       setPatientData(patientRecord);
@@ -263,6 +286,9 @@ export default function PatientPortal() {
                 <h2 className="text-2xl font-bold">Welcome, {patientData.name.split(' ')[0]}!</h2>
                 <p className="text-muted-foreground">Here's an overview of your health records</p>
                 <div className="flex flex-wrap gap-4 mt-4 text-sm">
+                  <span className="flex items-center gap-1">
+                    <Badge variant="secondary" className="font-mono">{patientData.patient_id}</Badge>
+                  </span>
                   <span className="flex items-center gap-1">
                     <Badge variant="outline">{patientData.age} years</Badge>
                   </span>
