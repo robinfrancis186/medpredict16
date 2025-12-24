@@ -8,7 +8,6 @@ import {
   LayoutDashboard,
   Users,
   FileText,
-  Settings,
   LogOut,
   Menu,
   X,
@@ -23,20 +22,20 @@ interface DashboardLayoutProps {
 }
 
 export function DashboardLayout({ children }: DashboardLayoutProps) {
-  const { user, logout } = useAuth();
+  const { profile, role, signOut } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
-  const handleLogout = () => {
-    logout();
-    navigate('/login');
+  const handleLogout = async () => {
+    await signOut();
+    navigate('/auth');
   };
 
   const navigation = [
     { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
     { name: 'Patients', href: '/patients', icon: Users },
-    { name: 'X-Ray Analysis', href: '/analysis', icon: Scan },
+    { name: 'Scan Analysis', href: '/analysis', icon: Scan },
     { name: 'Vitals Monitor', href: '/vitals', icon: Activity },
     { name: 'Records', href: '/records', icon: FileText },
   ];
@@ -68,7 +67,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
             </div>
             <div>
               <h1 className="font-display font-bold text-foreground">MedPredict</h1>
-              <p className="text-xs text-muted-foreground">AI Diagnostics</p>
+              <p className="text-xs text-muted-foreground">Medical Platform</p>
             </div>
             <button
               onClick={() => setSidebarOpen(false)}
@@ -104,12 +103,12 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
             <div className="flex items-center gap-3 mb-3">
               <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
                 <span className="text-sm font-semibold text-primary">
-                  {user?.name.split(' ').map(n => n[0]).join('')}
+                  {profile?.full_name?.split(' ').map(n => n[0]).join('') || 'U'}
                 </span>
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-foreground truncate">{user?.name}</p>
-                <p className="text-xs text-muted-foreground capitalize">{user?.role}</p>
+                <p className="text-sm font-medium text-foreground truncate">{profile?.full_name || 'User'}</p>
+                <p className="text-xs text-muted-foreground capitalize">{role || 'Staff'}</p>
               </div>
             </div>
             <Button
