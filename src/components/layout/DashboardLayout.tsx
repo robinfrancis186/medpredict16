@@ -17,6 +17,7 @@ import {
   ShieldCheck,
   ChevronRight,
   Calendar,
+  TestTube,
 } from 'lucide-react';
 
 interface DashboardLayoutProps {
@@ -39,6 +40,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
     { name: 'Patients', href: '/patients', icon: Users },
     { name: 'Scan Analysis', href: '/analysis', icon: Scan },
     { name: 'Vitals Monitor', href: '/vitals', icon: Activity },
+    { name: 'Lab Results', href: '/lab-results', icon: TestTube },
     { name: 'Appointments', href: '/appointments', icon: Calendar },
     { name: 'Records', href: '/records', icon: FileText },
   ];

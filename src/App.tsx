@@ -13,6 +13,8 @@ import XRayAnalysis from "./pages/XRayAnalysis";
 import VitalsMonitor from "./pages/VitalsMonitor";
 import MedicalRecords from "./pages/MedicalRecords";
 import Appointments from "./pages/Appointments";
+import LabResults from "./pages/LabResults";
+import PatientPortal from "./pages/PatientPortal";
 import NotFound from "./pages/NotFound";
 import { Loader2 } from "lucide-react";
 
@@ -94,6 +96,22 @@ function AppRoutes() {
         element={
           <ProtectedRoute>
             <Appointments />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/lab-results"
+        element={
+          <ProtectedRoute>
+            <LabResults />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/portal"
+        element={
+          <ProtectedRoute>
+            <PatientPortal />
           </ProtectedRoute>
         }
       />
