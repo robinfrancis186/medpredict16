@@ -44,14 +44,19 @@ export default function Auth() {
   const [showDisclaimer, setShowDisclaimer] = useState(false);
   const [errors, setErrors] = useState<{ email?: string; password?: string; fullName?: string }>({});
 
-  const { signIn, signUp, isAuthenticated, isLoading: authLoading } = useAuth();
+  const { signIn, signUp, isAuthenticated, isLoading: authLoading, role } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (!authLoading && isAuthenticated) {
-      navigate('/dashboard');
+    if (!authLoading && isAuthenticated && role) {
+      // Redirect based on role
+      if (role === 'patient') {
+        navigate('/portal');
+      } else {
+        navigate('/dashboard');
+      }
     }
-  }, [isAuthenticated, authLoading, navigate]);
+  }, [isAuthenticated, authLoading, role, navigate]);
 
   const validateForm = () => {
     try {
@@ -102,7 +107,7 @@ export default function Auth() {
           return;
         }
         toast.success('Welcome back!');
-        navigate('/dashboard');
+        // Navigation handled by useEffect based on role
       } else {
         const { error } = await signUp(email, password, fullName, selectedRole);
         if (error) {
@@ -116,9 +121,11 @@ export default function Auth() {
           return;
         }
         toast.success('Account created!', {
-          description: 'You can now access the system.',
+          description: selectedRole === 'patient' 
+            ? 'Welcome to the Patient Portal.' 
+            : 'You can now access the clinical dashboard.',
         });
-        navigate('/dashboard');
+        // Navigation handled by useEffect based on role
       }
     } catch (error: any) {
       toast.error('An error occurred', { description: error.message });

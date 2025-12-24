@@ -155,10 +155,12 @@ export default function Dashboard() {
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
             <h1 className="text-2xl lg:text-3xl font-display font-bold text-foreground">
-              Welcome back, {profile?.full_name?.split(' ')[0] || 'Doctor'}
+              Welcome back, {role === 'doctor' ? 'Dr. ' : ''}{profile?.full_name?.split(' ')[0] || 'User'}
             </h1>
             <p className="text-muted-foreground mt-1">
-              Here's an overview of your clinical dashboard
+              {role === 'doctor' 
+                ? "Here's your clinical dashboard overview"
+                : "Here's your patient care dashboard"}
             </p>
           </div>
           <div className="flex gap-3">

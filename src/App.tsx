@@ -20,6 +20,7 @@ import { Loader2 } from "lucide-react";
 
 const queryClient = new QueryClient();
 
+// Protected route for authenticated users
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { isAuthenticated, isLoading } = useAuth();
   
@@ -38,83 +39,164 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
   return <>{children}</>;
 }
 
+// Staff-only route (doctors and nurses)
+function StaffRoute({ children }: { children: React.ReactNode }) {
+  const { isAuthenticated, isLoading, role } = useAuth();
+  
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+  
+  if (!isAuthenticated) {
+    return <Navigate to="/auth" replace />;
+  }
+  
+  // Patients should be redirected to their portal
+  if (role === 'patient') {
+    return <Navigate to="/portal" replace />;
+  }
+  
+  return <>{children}</>;
+}
+
+// Doctor-only route
+function DoctorRoute({ children }: { children: React.ReactNode }) {
+  const { isAuthenticated, isLoading, role } = useAuth();
+  
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+  
+  if (!isAuthenticated) {
+    return <Navigate to="/auth" replace />;
+  }
+  
+  if (role === 'patient') {
+    return <Navigate to="/portal" replace />;
+  }
+  
+  // Only doctors can access certain features
+  if (role !== 'doctor') {
+    return <Navigate to="/dashboard" replace />;
+  }
+  
+  return <>{children}</>;
+}
+
+// Patient-only route
+function PatientRoute({ children }: { children: React.ReactNode }) {
+  const { isAuthenticated, isLoading, role } = useAuth();
+  
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+  
+  if (!isAuthenticated) {
+    return <Navigate to="/auth" replace />;
+  }
+  
+  // Staff should be redirected to dashboard
+  if (role !== 'patient') {
+    return <Navigate to="/dashboard" replace />;
+  }
+  
+  return <>{children}</>;
+}
+
 function AppRoutes() {
   return (
     <Routes>
       <Route path="/" element={<Index />} />
       <Route path="/auth" element={<Auth />} />
+      
+      {/* Staff Routes (Doctors & Nurses) */}
       <Route
         path="/dashboard"
         element={
-          <ProtectedRoute>
+          <StaffRoute>
             <Dashboard />
-          </ProtectedRoute>
+          </StaffRoute>
         }
       />
       <Route
         path="/patients"
         element={
-          <ProtectedRoute>
+          <StaffRoute>
             <Patients />
-          </ProtectedRoute>
+          </StaffRoute>
         }
       />
       <Route
         path="/patients/:id"
         element={
-          <ProtectedRoute>
+          <StaffRoute>
             <PatientDetail />
-          </ProtectedRoute>
+          </StaffRoute>
         }
       />
       <Route
         path="/analysis"
         element={
-          <ProtectedRoute>
+          <StaffRoute>
             <XRayAnalysis />
-          </ProtectedRoute>
+          </StaffRoute>
         }
       />
       <Route
         path="/vitals"
         element={
-          <ProtectedRoute>
+          <StaffRoute>
             <VitalsMonitor />
-          </ProtectedRoute>
+          </StaffRoute>
         }
       />
       <Route
         path="/records"
         element={
-          <ProtectedRoute>
+          <StaffRoute>
             <MedicalRecords />
-          </ProtectedRoute>
+          </StaffRoute>
         }
       />
       <Route
         path="/appointments"
         element={
-          <ProtectedRoute>
+          <StaffRoute>
             <Appointments />
-          </ProtectedRoute>
+          </StaffRoute>
         }
       />
       <Route
         path="/lab-results"
         element={
-          <ProtectedRoute>
+          <StaffRoute>
             <LabResults />
-          </ProtectedRoute>
+          </StaffRoute>
         }
       />
+      
+      {/* Patient Portal */}
       <Route
         path="/portal"
         element={
-          <ProtectedRoute>
+          <PatientRoute>
             <PatientPortal />
-          </ProtectedRoute>
+          </PatientRoute>
         }
       />
+      
       <Route path="*" element={<NotFound />} />
     </Routes>
   );
