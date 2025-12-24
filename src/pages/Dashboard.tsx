@@ -4,6 +4,7 @@ import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { RiskBadge } from '@/components/RiskBadge';
+import { PendingApprovalsCard } from '@/components/PendingApprovalsCard';
 import { Button } from '@/components/ui/button';
 import {
   Users,
@@ -198,6 +199,9 @@ export default function Dashboard() {
             </div>
           ))}
         </div>
+
+        {/* Pending Approvals (only for staff) */}
+        <PendingApprovalsCard />
 
         <div className="grid lg:grid-cols-3 gap-6">
           {/* Recent patients */}
