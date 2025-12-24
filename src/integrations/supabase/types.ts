@@ -360,6 +360,7 @@ export type Database = {
           address: string | null
           age: number
           allergies: string[] | null
+          approval_status: string
           avatar_url: string | null
           blood_group: string
           chronic_conditions: string[] | null
@@ -379,6 +380,7 @@ export type Database = {
           address?: string | null
           age: number
           allergies?: string[] | null
+          approval_status?: string
           avatar_url?: string | null
           blood_group: string
           chronic_conditions?: string[] | null
@@ -398,6 +400,7 @@ export type Database = {
           address?: string | null
           age?: number
           allergies?: string[] | null
+          approval_status?: string
           avatar_url?: string | null
           blood_group?: string
           chronic_conditions?: string[] | null

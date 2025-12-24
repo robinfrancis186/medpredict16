@@ -4,6 +4,7 @@ import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { RiskBadge } from '@/components/RiskBadge';
 import { ClinicalDisclaimer } from '@/components/ClinicalDisclaimer';
 import { VitalsChart } from '@/components/VitalsChart';
+import { PatientLinkDialog } from '@/components/PatientLinkDialog';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { supabase } from '@/integrations/supabase/client';
@@ -28,6 +29,7 @@ import {
   Calendar,
   Loader2,
   TrendingUp,
+  Link2,
 } from 'lucide-react';
 
 interface Patient {
@@ -92,6 +94,7 @@ export default function PatientDetail() {
   const [records, setRecords] = useState<MedicalRecord[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
+  const [showLinkDialog, setShowLinkDialog] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -286,6 +289,10 @@ export default function PatientDetail() {
             <p className="text-muted-foreground font-mono">{patient.patient_id || 'ID pending'}</p>
           </div>
           <div className="flex gap-2">
+            <Button variant="outline" size="sm" onClick={() => setShowLinkDialog(true)}>
+              <Link2 className="w-4 h-4 mr-2" />
+              Link Account
+            </Button>
             <Button variant="outline" size="sm">
               <Share2 className="w-4 h-4 mr-2" />
               Share
@@ -305,6 +312,24 @@ export default function PatientDetail() {
             </Button>
           </div>
         </div>
+
+        {/* Patient Link Dialog */}
+        <PatientLinkDialog
+          open={showLinkDialog}
+          onOpenChange={setShowLinkDialog}
+          patientId={patient.id}
+          patientName={patient.name}
+          currentEmail={patient.email}
+          onSuccess={() => {
+            // Refresh patient data
+            supabase
+              .from('patients')
+              .select('*')
+              .eq('id', id)
+              .maybeSingle()
+              .then(({ data }) => setPatient(data));
+          }}
+        />
 
         {/* Emergency banner */}
         {risk.overallRisk === 'high' && <ClinicalDisclaimer variant="emergency" />}

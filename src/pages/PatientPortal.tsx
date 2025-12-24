@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -8,7 +8,9 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { ClinicalDisclaimer } from '@/components/ClinicalDisclaimer';
 import { VitalsChart } from '@/components/VitalsChart';
+import { PatientSelfRegistration } from '@/components/PatientSelfRegistration';
 import { format } from 'date-fns';
+import { toast } from 'sonner';
 import { 
   User, 
   Calendar, 
@@ -21,7 +23,9 @@ import {
   TrendingDown,
   Minus,
   ShieldCheck,
-  AlertCircle
+  AlertCircle,
+  CheckCircle,
+  ClockIcon
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -34,6 +38,7 @@ interface PatientData {
   blood_group: string;
   allergies: string[];
   chronic_conditions: string[];
+  approval_status: string;
 }
 
 interface Appointment {
@@ -111,6 +116,8 @@ export default function PatientPortal() {
   const [medicalRecords, setMedicalRecords] = useState<MedicalRecord[]>([]);
   const [vitals, setVitals] = useState<Vital[]>([]);
   const [loading, setLoading] = useState(true);
+  const [wasAutoLinked, setWasAutoLinked] = useState(false);
+  const hasShownToast = useRef(false);
 
   useEffect(() => {
     if (user) {
@@ -138,7 +145,7 @@ export default function PatientPortal() {
         .is('created_by', null)
         .maybeSingle();
 
-      if (patientByEmail) {
+      if (patientByEmail && patientByEmail.approval_status === 'approved') {
         // Link this patient to the current user
         const { error } = await supabase
           .from('patients')
@@ -147,6 +154,7 @@ export default function PatientPortal() {
 
         if (!error) {
           patientRecord = { ...patientByEmail, created_by: user.id };
+          setWasAutoLinked(true);
         }
       }
     }
@@ -208,7 +216,46 @@ export default function PatientPortal() {
     );
   }
 
+  // Show success toast when auto-linked
+  useEffect(() => {
+    if (wasAutoLinked && patientData && !hasShownToast.current) {
+      hasShownToast.current = true;
+      toast.success('Account Linked Successfully!', {
+        description: `Your account has been connected to your patient record. You now have access to your medical records, appointments, lab results, and vitals.`,
+        duration: 6000,
+      });
+    }
+  }, [wasAutoLinked, patientData]);
+
   if (!patientData) {
+    return (
+      <div className="min-h-screen bg-background">
+        <header className="bg-card border-b border-border px-6 py-4">
+          <div className="max-w-6xl mx-auto flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center">
+                <ShieldCheck className="w-6 h-6 text-primary-foreground" />
+              </div>
+              <div>
+                <h1 className="font-bold text-foreground">MedPredict</h1>
+                <p className="text-xs text-muted-foreground">Patient Portal</p>
+              </div>
+            </div>
+            <Button variant="ghost" onClick={handleLogout}>
+              <LogOut className="h-4 w-4 mr-2" />
+              Sign Out
+            </Button>
+          </div>
+        </header>
+        <main className="max-w-6xl mx-auto px-6 py-12">
+          <PatientSelfRegistration onSuccess={fetchPatientData} />
+        </main>
+      </div>
+    );
+  }
+
+  // Show pending status
+  if (patientData.approval_status === 'pending') {
     return (
       <div className="min-h-screen bg-background">
         <header className="bg-card border-b border-border px-6 py-4">
@@ -231,12 +278,16 @@ export default function PatientPortal() {
         <main className="max-w-6xl mx-auto px-6 py-12">
           <Card className="max-w-md mx-auto">
             <CardContent className="pt-6 text-center">
-              <AlertCircle className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-              <h2 className="text-xl font-semibold mb-2">No Patient Record Found</h2>
+              <ClockIcon className="h-12 w-12 text-risk-medium mx-auto mb-4" />
+              <h2 className="text-xl font-semibold mb-2">Registration Pending</h2>
               <p className="text-muted-foreground mb-4">
-                Your account is not linked to a patient record yet. Please contact your healthcare provider to set up access.
+                Your patient registration is being reviewed by our healthcare staff. You'll have full access once approved.
               </p>
-              <Button variant="outline" onClick={handleLogout}>
+              <div className="p-3 rounded-lg bg-muted/50 text-sm text-muted-foreground">
+                <p className="font-medium text-foreground mb-1">{patientData.name}</p>
+                <p className="font-mono text-xs">{patientData.patient_id}</p>
+              </div>
+              <Button variant="outline" onClick={handleLogout} className="mt-4">
                 Sign Out
               </Button>
             </CardContent>
