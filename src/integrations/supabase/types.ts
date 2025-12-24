@@ -109,6 +109,102 @@ export type Database = {
           },
         ]
       }
+      lab_results: {
+        Row: {
+          collected_at: string
+          created_at: string
+          id: string
+          notes: string | null
+          ordered_by: string | null
+          patient_id: string
+          resulted_at: string | null
+          status: string
+          test_type_id: string
+          unit: string
+          value: number
+        }
+        Insert: {
+          collected_at?: string
+          created_at?: string
+          id?: string
+          notes?: string | null
+          ordered_by?: string | null
+          patient_id: string
+          resulted_at?: string | null
+          status?: string
+          test_type_id: string
+          unit: string
+          value: number
+        }
+        Update: {
+          collected_at?: string
+          created_at?: string
+          id?: string
+          notes?: string | null
+          ordered_by?: string | null
+          patient_id?: string
+          resulted_at?: string | null
+          status?: string
+          test_type_id?: string
+          unit?: string
+          value?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lab_results_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: false
+            referencedRelation: "patients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lab_results_test_type_id_fkey"
+            columns: ["test_type_id"]
+            isOneToOne: false
+            referencedRelation: "lab_test_types"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      lab_test_types: {
+        Row: {
+          category: string
+          code: string
+          critical_high: number | null
+          critical_low: number | null
+          description: string | null
+          id: string
+          max_normal: number | null
+          min_normal: number | null
+          name: string
+          unit: string
+        }
+        Insert: {
+          category: string
+          code: string
+          critical_high?: number | null
+          critical_low?: number | null
+          description?: string | null
+          id?: string
+          max_normal?: number | null
+          min_normal?: number | null
+          name: string
+          unit: string
+        }
+        Update: {
+          category?: string
+          code?: string
+          critical_high?: number | null
+          critical_low?: number | null
+          description?: string | null
+          id?: string
+          max_normal?: number | null
+          min_normal?: number | null
+          name?: string
+          unit?: string
+        }
+        Relationships: []
+      }
       medical_records: {
         Row: {
           created_at: string
