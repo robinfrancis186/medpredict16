@@ -101,35 +101,41 @@ export default function XRayAnalysis() {
     if (!uploadedImage || !consentAccepted || !selectedPatient) return;
 
     setIsAnalyzing(true);
+    const startTime = Date.now();
 
-    // Simulate AI analysis
-    await new Promise((resolve) => setTimeout(resolve, 3000));
-
-    const diagnosisProbability = Math.random() * 0.5 + 0.3;
-    const abnormalityScore = Math.random() * 0.4 + 0.4;
-    const fusedScore = (diagnosisProbability + abnormalityScore) / 2;
-
-    const factors: string[] = [];
-    if (diagnosisProbability > 0.6) factors.push('Elevated diagnosis probability');
-    if (abnormalityScore > 0.5) factors.push('Significant abnormality detected');
-
-    const result: AnalysisResult = {
-      diagnosisProbability,
-      abnormalityScore,
-      confidenceScore: 0.85 + Math.random() * 0.1,
-      inferenceTime: 2.3 + Math.random() * 1.5,
-      riskLevel: fusedScore >= 0.7 ? 'high' : fusedScore >= 0.4 ? 'medium' : 'low',
-      explanation:
-        fusedScore >= 0.7
-          ? 'High probability of abnormality detected. Immediate clinical review recommended.'
-          : fusedScore >= 0.4
-          ? 'Moderate abnormality detected. Further examination advised.'
-          : 'No significant abnormalities detected. Continue standard monitoring.',
-      factors,
-    };
-
-    // Save to database
     try {
+      const patient = patients.find((p) => p.id === selectedPatient);
+      
+      // Call the real AI edge function
+      const { data, error } = await supabase.functions.invoke('analyze-scan', {
+        body: {
+          imageBase64: uploadedImage,
+          scanType: scanTypes.find(t => t.value === selectedScanType)?.label || selectedScanType,
+          patientInfo: patient ? {
+            name: patient.name,
+            age: patient.age,
+            gender: patient.gender,
+            chronicConditions: patient.chronic_conditions,
+            allergies: patient.allergies
+          } : undefined
+        }
+      });
+
+      if (error) throw error;
+
+      const inferenceTime = (Date.now() - startTime) / 1000;
+
+      const result: AnalysisResult = {
+        diagnosisProbability: (data.confidenceScore || 70) / 100,
+        abnormalityScore: (data.abnormalityScore || 30) / 100,
+        confidenceScore: (data.confidenceScore || 85) / 100,
+        inferenceTime,
+        riskLevel: data.riskLevel || 'medium',
+        explanation: data.aiExplanation || data.primaryDiagnosis || 'Analysis completed',
+        factors: data.keyFactors || data.recommendations || [],
+      };
+
+      // Save to database
       await supabase.from('medical_scans').insert({
         patient_id: selectedPatient,
         scan_type: selectedScanType,
@@ -141,13 +147,29 @@ export default function XRayAnalysis() {
         ai_explanation: result.explanation,
         ai_factors: result.factors,
       });
-    } catch (error) {
-      console.error('Error saving scan:', error);
-    }
 
-    setAnalysisResult(result);
-    setIsAnalyzing(false);
-    toast.success('Analysis complete', { description: `Risk level: ${result.riskLevel.toUpperCase()}` });
+      // Create notification for high-risk results
+      if (result.riskLevel === 'high') {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) {
+          await supabase.from('notifications').insert({
+            user_id: user.id,
+            title: 'High Risk Scan Detected',
+            message: `${patient?.name || 'Patient'}'s ${scanTypes.find(t => t.value === selectedScanType)?.label} shows high risk indicators. Immediate review recommended.`,
+            type: 'high_risk_alert',
+            patient_id: selectedPatient
+          });
+        }
+      }
+
+      setAnalysisResult(result);
+      toast.success('Analysis complete', { description: `Risk level: ${result.riskLevel.toUpperCase()}` });
+    } catch (error) {
+      console.error('Analysis failed:', error);
+      toast.error('Analysis failed', { description: 'Please try again or contact support.' });
+    } finally {
+      setIsAnalyzing(false);
+    }
   };
 
   const resetAnalysis = () => {

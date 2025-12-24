@@ -12,6 +12,7 @@ import PatientDetail from "./pages/PatientDetail";
 import XRayAnalysis from "./pages/XRayAnalysis";
 import VitalsMonitor from "./pages/VitalsMonitor";
 import MedicalRecords from "./pages/MedicalRecords";
+import Appointments from "./pages/Appointments";
 import NotFound from "./pages/NotFound";
 import { Loader2 } from "lucide-react";
 
@@ -85,6 +86,14 @@ function AppRoutes() {
         element={
           <ProtectedRoute>
             <MedicalRecords />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/appointments"
+        element={
+          <ProtectedRoute>
+            <Appointments />
           </ProtectedRoute>
         }
       />

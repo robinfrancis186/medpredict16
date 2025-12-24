@@ -3,6 +3,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { cn } from '@/lib/utils';
 import { ClinicalDisclaimer } from '@/components/ClinicalDisclaimer';
+import { NotificationBell } from '@/components/NotificationBell';
 import { Button } from '@/components/ui/button';
 import {
   LayoutDashboard,
@@ -15,6 +16,7 @@ import {
   Scan,
   ShieldCheck,
   ChevronRight,
+  Calendar,
 } from 'lucide-react';
 
 interface DashboardLayoutProps {
@@ -37,6 +39,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
     { name: 'Patients', href: '/patients', icon: Users },
     { name: 'Scan Analysis', href: '/analysis', icon: Scan },
     { name: 'Vitals Monitor', href: '/vitals', icon: Activity },
+    { name: 'Appointments', href: '/appointments', icon: Calendar },
     { name: 'Records', href: '/records', icon: FileText },
   ];
 
@@ -135,9 +138,12 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
               <Menu className="w-6 h-6" />
             </button>
             <div className="flex-1" />
-            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-              <Activity className="w-4 h-4 text-risk-low" />
-              <span>System Online</span>
+            <div className="flex items-center gap-4">
+              <NotificationBell />
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <Activity className="w-4 h-4 text-risk-low" />
+                <span>System Online</span>
+              </div>
             </div>
           </div>
         </header>
