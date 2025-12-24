@@ -14,16 +14,355 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      analysis_reports: {
+        Row: {
+          created_at: string
+          generated_by: string | null
+          id: string
+          patient_id: string
+          pdf_url: string | null
+          report_data: Json | null
+          report_type: string
+          scan_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          generated_by?: string | null
+          id?: string
+          patient_id: string
+          pdf_url?: string | null
+          report_data?: Json | null
+          report_type?: string
+          scan_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          generated_by?: string | null
+          id?: string
+          patient_id?: string
+          pdf_url?: string | null
+          report_data?: Json | null
+          report_type?: string
+          scan_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "analysis_reports_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: false
+            referencedRelation: "patients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "analysis_reports_scan_id_fkey"
+            columns: ["scan_id"]
+            isOneToOne: false
+            referencedRelation: "medical_scans"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      medical_records: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          date: string
+          file_url: string | null
+          hospital: string | null
+          id: string
+          notes: string | null
+          patient_id: string
+          title: string
+          type: Database["public"]["Enums"]["record_type"]
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          date: string
+          file_url?: string | null
+          hospital?: string | null
+          id?: string
+          notes?: string | null
+          patient_id: string
+          title: string
+          type: Database["public"]["Enums"]["record_type"]
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          date?: string
+          file_url?: string | null
+          hospital?: string | null
+          id?: string
+          notes?: string | null
+          patient_id?: string
+          title?: string
+          type?: Database["public"]["Enums"]["record_type"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "medical_records_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: false
+            referencedRelation: "patients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      medical_scans: {
+        Row: {
+          abnormality_score: number | null
+          ai_explanation: string | null
+          ai_factors: string[] | null
+          analyzed_by: string | null
+          confidence_score: number | null
+          created_at: string
+          diagnosis_probability: number | null
+          heatmap_url: string | null
+          id: string
+          image_url: string | null
+          inference_time: number | null
+          notes: string | null
+          patient_id: string
+          risk_level: string | null
+          scan_type: string
+        }
+        Insert: {
+          abnormality_score?: number | null
+          ai_explanation?: string | null
+          ai_factors?: string[] | null
+          analyzed_by?: string | null
+          confidence_score?: number | null
+          created_at?: string
+          diagnosis_probability?: number | null
+          heatmap_url?: string | null
+          id?: string
+          image_url?: string | null
+          inference_time?: number | null
+          notes?: string | null
+          patient_id: string
+          risk_level?: string | null
+          scan_type?: string
+        }
+        Update: {
+          abnormality_score?: number | null
+          ai_explanation?: string | null
+          ai_factors?: string[] | null
+          analyzed_by?: string | null
+          confidence_score?: number | null
+          created_at?: string
+          diagnosis_probability?: number | null
+          heatmap_url?: string | null
+          id?: string
+          image_url?: string | null
+          inference_time?: number | null
+          notes?: string | null
+          patient_id?: string
+          risk_level?: string | null
+          scan_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "medical_scans_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: false
+            referencedRelation: "patients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      patients: {
+        Row: {
+          address: string | null
+          age: number
+          allergies: string[] | null
+          avatar_url: string | null
+          blood_group: string
+          chronic_conditions: string[] | null
+          created_at: string
+          created_by: string | null
+          date_of_birth: string | null
+          email: string | null
+          emergency_contact: string
+          gender: Database["public"]["Enums"]["gender_type"]
+          id: string
+          name: string
+          phone: string | null
+          updated_at: string
+        }
+        Insert: {
+          address?: string | null
+          age: number
+          allergies?: string[] | null
+          avatar_url?: string | null
+          blood_group: string
+          chronic_conditions?: string[] | null
+          created_at?: string
+          created_by?: string | null
+          date_of_birth?: string | null
+          email?: string | null
+          emergency_contact: string
+          gender: Database["public"]["Enums"]["gender_type"]
+          id?: string
+          name: string
+          phone?: string | null
+          updated_at?: string
+        }
+        Update: {
+          address?: string | null
+          age?: number
+          allergies?: string[] | null
+          avatar_url?: string | null
+          blood_group?: string
+          chronic_conditions?: string[] | null
+          created_at?: string
+          created_by?: string | null
+          date_of_birth?: string | null
+          email?: string | null
+          emergency_contact?: string
+          gender?: Database["public"]["Enums"]["gender_type"]
+          id?: string
+          name?: string
+          phone?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          created_at: string
+          department: string | null
+          email: string
+          full_name: string
+          id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string
+          department?: string | null
+          email: string
+          full_name: string
+          id?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string
+          department?: string | null
+          email?: string
+          full_name?: string
+          id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_roles: {
+        Row: {
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
+      vitals: {
+        Row: {
+          blood_pressure_diastolic: number | null
+          blood_pressure_systolic: number | null
+          heart_rate: number | null
+          id: string
+          notes: string | null
+          patient_id: string
+          recorded_at: string
+          recorded_by: string | null
+          respiratory_rate: number | null
+          smoking_history: boolean | null
+          spo2: number | null
+          temperature: number | null
+        }
+        Insert: {
+          blood_pressure_diastolic?: number | null
+          blood_pressure_systolic?: number | null
+          heart_rate?: number | null
+          id?: string
+          notes?: string | null
+          patient_id: string
+          recorded_at?: string
+          recorded_by?: string | null
+          respiratory_rate?: number | null
+          smoking_history?: boolean | null
+          spo2?: number | null
+          temperature?: number | null
+        }
+        Update: {
+          blood_pressure_diastolic?: number | null
+          blood_pressure_systolic?: number | null
+          heart_rate?: number | null
+          id?: string
+          notes?: string | null
+          patient_id?: string
+          recorded_at?: string
+          recorded_by?: string | null
+          respiratory_rate?: number | null
+          smoking_history?: boolean | null
+          spo2?: number | null
+          temperature?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vitals_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: false
+            referencedRelation: "patients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      get_user_role: {
+        Args: { _user_id: string }
+        Returns: Database["public"]["Enums"]["app_role"]
+      }
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "doctor" | "nurse" | "patient"
+      gender_type: "male" | "female" | "other"
+      record_type:
+        | "discharge_summary"
+        | "diagnosis"
+        | "xray_report"
+        | "ct_report"
+        | "prescription"
+        | "lab_result"
+        | "mri_report"
+        | "ultrasound_report"
+        | "blood_test"
+        | "ecg_report"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +489,21 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["doctor", "nurse", "patient"],
+      gender_type: ["male", "female", "other"],
+      record_type: [
+        "discharge_summary",
+        "diagnosis",
+        "xray_report",
+        "ct_report",
+        "prescription",
+        "lab_result",
+        "mri_report",
+        "ultrasound_report",
+        "blood_test",
+        "ecg_report",
+      ],
+    },
   },
 } as const

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -9,7 +9,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { mockPatients, mockMedicalRecords } from '@/data/mockData';
+import { supabase } from '@/integrations/supabase/client';
 import {
   FileText,
   Search,
@@ -20,8 +20,24 @@ import {
   Share2,
   Eye,
   Clock,
-  Filter,
+  Loader2,
 } from 'lucide-react';
+
+interface Patient {
+  id: string;
+  name: string;
+}
+
+interface MedicalRecord {
+  id: string;
+  patient_id: string;
+  type: string;
+  title: string;
+  date: string;
+  hospital: string | null;
+  notes: string | null;
+  created_at: string;
+}
 
 const recordTypeLabels: Record<string, string> = {
   discharge_summary: 'Discharge Summary',
@@ -30,6 +46,10 @@ const recordTypeLabels: Record<string, string> = {
   ct_report: 'CT Report',
   prescription: 'Prescription',
   lab_result: 'Lab Result',
+  mri_report: 'MRI Report',
+  ultrasound_report: 'Ultrasound Report',
+  blood_test: 'Blood Test',
+  ecg_report: 'ECG Report',
 };
 
 const recordTypeColors: Record<string, string> = {
@@ -39,32 +59,59 @@ const recordTypeColors: Record<string, string> = {
   ct_report: 'bg-risk-medium/10 text-risk-medium',
   prescription: 'bg-risk-low/10 text-risk-low',
   lab_result: 'bg-accent text-accent-foreground',
+  mri_report: 'bg-primary/10 text-primary',
+  ultrasound_report: 'bg-secondary/10 text-secondary',
+  blood_test: 'bg-risk-high/10 text-risk-high',
+  ecg_report: 'bg-risk-medium/10 text-risk-medium',
 };
 
 export default function MedicalRecords() {
+  const [patients, setPatients] = useState<Patient[]>([]);
+  const [records, setRecords] = useState<MedicalRecord[]>([]);
   const [selectedPatient, setSelectedPatient] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [typeFilter, setTypeFilter] = useState<string>('all');
+  const [isLoading, setIsLoading] = useState(true);
 
-  // Combine all records
-  const allRecords = Object.entries(mockMedicalRecords).flatMap(([patientId, records]) =>
-    records.map((record) => ({
-      ...record,
-      patientName: mockPatients.find((p) => p.id === patientId)?.name || 'Unknown',
-    }))
-  );
+  useEffect(() => {
+    const fetchData = async () => {
+      setIsLoading(true);
+      try {
+        // Fetch patients
+        const { data: patientsData } = await supabase
+          .from('patients')
+          .select('id, name')
+          .order('name');
+        setPatients(patientsData || []);
 
-  const filteredRecords = allRecords.filter((record) => {
-    const matchesPatient = selectedPatient === 'all' || record.patientId === selectedPatient;
+        // Fetch records
+        const { data: recordsData } = await supabase
+          .from('medical_records')
+          .select('*')
+          .order('date', { ascending: false });
+        setRecords(recordsData || []);
+      } catch (error) {
+        console.error('Error fetching data:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  const filteredRecords = records.filter((record) => {
+    const matchesPatient = selectedPatient === 'all' || record.patient_id === selectedPatient;
     const matchesSearch =
       record.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      record.hospital.toLowerCase().includes(searchQuery.toLowerCase());
+      (record.hospital?.toLowerCase().includes(searchQuery.toLowerCase()) ?? false);
     const matchesType = typeFilter === 'all' || record.type === typeFilter;
     return matchesPatient && matchesSearch && matchesType;
   });
 
-  // Sort by date (newest first)
-  filteredRecords.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+  const getPatientName = (patientId: string) => {
+    return patients.find((p) => p.id === patientId)?.name || 'Unknown';
+  };
 
   return (
     <DashboardLayout>
@@ -103,7 +150,7 @@ export default function MedicalRecords() {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All Patients</SelectItem>
-                {mockPatients.map((patient) => (
+                {patients.map((patient) => (
                   <SelectItem key={patient.id} value={patient.id}>
                     {patient.name}
                   </SelectItem>
@@ -126,9 +173,13 @@ export default function MedicalRecords() {
           </div>
         </div>
 
-        {/* Records timeline */}
+        {/* Records list */}
         <div className="space-y-4">
-          {filteredRecords.length > 0 ? (
+          {isLoading ? (
+            <div className="flex items-center justify-center py-12">
+              <Loader2 className="w-8 h-8 animate-spin text-primary" />
+            </div>
+          ) : filteredRecords.length > 0 ? (
             filteredRecords.map((record, i) => (
               <div
                 key={record.id}
@@ -146,18 +197,20 @@ export default function MedicalRecords() {
                     <div className="flex items-start justify-between gap-4 mb-2">
                       <div>
                         <h3 className="font-semibold text-foreground truncate">{record.title}</h3>
-                        <p className="text-sm text-muted-foreground">{record.patientName}</p>
+                        <p className="text-sm text-muted-foreground">{getPatientName(record.patient_id)}</p>
                       </div>
-                      <span className={`px-2.5 py-1 rounded-full text-xs font-medium ${recordTypeColors[record.type]}`}>
-                        {recordTypeLabels[record.type]}
+                      <span className={`px-2.5 py-1 rounded-full text-xs font-medium ${recordTypeColors[record.type] || 'bg-muted text-muted-foreground'}`}>
+                        {recordTypeLabels[record.type] || record.type}
                       </span>
                     </div>
 
                     <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
-                      <span className="flex items-center gap-1.5">
-                        <Building2 className="w-4 h-4" />
-                        {record.hospital}
-                      </span>
+                      {record.hospital && (
+                        <span className="flex items-center gap-1.5">
+                          <Building2 className="w-4 h-4" />
+                          {record.hospital}
+                        </span>
+                      )}
                       <span className="flex items-center gap-1.5">
                         <Calendar className="w-4 h-4" />
                         {new Date(record.date).toLocaleDateString()}
@@ -191,7 +244,9 @@ export default function MedicalRecords() {
               <FileText className="w-12 h-12 mx-auto text-muted-foreground/50 mb-4" />
               <h3 className="font-display font-semibold text-foreground mb-2">No Records Found</h3>
               <p className="text-sm text-muted-foreground">
-                No medical records match your current filters.
+                {searchQuery || selectedPatient !== 'all' || typeFilter !== 'all'
+                  ? 'No medical records match your current filters.'
+                  : 'No medical records have been added yet.'}
               </p>
             </div>
           )}
