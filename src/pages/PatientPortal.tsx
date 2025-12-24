@@ -125,6 +125,17 @@ export default function PatientPortal() {
     }
   }, [user]);
 
+  // Show success toast when auto-linked - must be before any early returns
+  useEffect(() => {
+    if (wasAutoLinked && patientData && !hasShownToast.current) {
+      hasShownToast.current = true;
+      toast.success('Account Linked Successfully!', {
+        description: `Your account has been connected to your patient record. You now have access to your medical records, appointments, lab results, and vitals.`,
+        duration: 6000,
+      });
+    }
+  }, [wasAutoLinked, patientData]);
+
   const fetchPatientData = async () => {
     if (!user) return;
     setLoading(true);
@@ -215,17 +226,6 @@ export default function PatientPortal() {
       </div>
     );
   }
-
-  // Show success toast when auto-linked
-  useEffect(() => {
-    if (wasAutoLinked && patientData && !hasShownToast.current) {
-      hasShownToast.current = true;
-      toast.success('Account Linked Successfully!', {
-        description: `Your account has been connected to your patient record. You now have access to your medical records, appointments, lab results, and vitals.`,
-        duration: 6000,
-      });
-    }
-  }, [wasAutoLinked, patientData]);
 
   if (!patientData) {
     return (
