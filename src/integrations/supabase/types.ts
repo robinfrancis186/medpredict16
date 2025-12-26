@@ -451,6 +451,59 @@ export type Database = {
         }
         Relationships: []
       }
+      scan_annotations: {
+        Row: {
+          annotation_type: string
+          color: string | null
+          content: string | null
+          created_at: string
+          height: number | null
+          id: string
+          scan_id: string
+          updated_at: string
+          user_id: string
+          width: number | null
+          x_position: number
+          y_position: number
+        }
+        Insert: {
+          annotation_type?: string
+          color?: string | null
+          content?: string | null
+          created_at?: string
+          height?: number | null
+          id?: string
+          scan_id: string
+          updated_at?: string
+          user_id: string
+          width?: number | null
+          x_position: number
+          y_position: number
+        }
+        Update: {
+          annotation_type?: string
+          color?: string | null
+          content?: string | null
+          created_at?: string
+          height?: number | null
+          id?: string
+          scan_id?: string
+          updated_at?: string
+          user_id?: string
+          width?: number | null
+          x_position?: number
+          y_position?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "scan_annotations_scan_id_fkey"
+            columns: ["scan_id"]
+            isOneToOne: false
+            referencedRelation: "medical_scans"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_roles: {
         Row: {
           id: string

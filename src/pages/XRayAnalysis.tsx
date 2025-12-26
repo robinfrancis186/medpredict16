@@ -2,6 +2,8 @@ import React, { useState, useRef, useEffect } from 'react';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { ClinicalDisclaimer } from '@/components/ClinicalDisclaimer';
 import { RiskBadge } from '@/components/RiskBadge';
+import { ComparativeScanViewer } from '@/components/ComparativeScanViewer';
+import { CollaborativeAnnotation } from '@/components/CollaborativeAnnotation';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
@@ -13,6 +15,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog';
 import { supabase } from '@/integrations/supabase/client';
 import { generateAnalysisReport, downloadPdf } from '@/lib/pdfGenerator';
 import { useAuth } from '@/contexts/AuthContext';
@@ -31,6 +40,8 @@ import {
   Brain,
   HeartPulse,
   Stethoscope,
+  ArrowLeftRight,
+  MessageSquare,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -75,6 +86,9 @@ export default function XRayAnalysis() {
   const [analysisResult, setAnalysisResult] = useState<AnalysisResult | null>(null);
   const [showHeatmap, setShowHeatmap] = useState(true);
   const [isExporting, setIsExporting] = useState(false);
+  const [showComparison, setShowComparison] = useState(false);
+  const [showAnnotations, setShowAnnotations] = useState(false);
+  const [latestScanId, setLatestScanId] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
