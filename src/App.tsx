@@ -18,6 +18,7 @@ import PatientPortal from "./pages/PatientPortal";
 import Prescriptions from "./pages/Prescriptions";
 import Insurance from "./pages/Insurance";
 import NotFound from "./pages/NotFound";
+import { OfflineIndicator } from "./components/OfflineIndicator";
 import { Loader2 } from "lucide-react";
 
 const queryClient = new QueryClient();
@@ -228,6 +229,7 @@ const App = () => (
         <Sonner />
         <BrowserRouter>
           <AppRoutes />
+          <OfflineIndicator />
         </BrowserRouter>
       </AuthProvider>
     </TooltipProvider>
