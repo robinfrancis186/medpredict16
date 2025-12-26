@@ -4,6 +4,7 @@ import { ClinicalDisclaimer } from '@/components/ClinicalDisclaimer';
 import { RiskBadge } from '@/components/RiskBadge';
 import { ComparativeScanViewer } from '@/components/ComparativeScanViewer';
 import { CollaborativeAnnotation } from '@/components/CollaborativeAnnotation';
+import { Scan3DViewer } from '@/components/Scan3DViewer';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
@@ -424,6 +425,51 @@ export default function XRayAnalysis() {
                           </li>
                         ))}
                       </ul>
+                    </div>
+                  )}
+
+                  {/* Collaborative Annotation & 3D Viewer */}
+                  {analysisResult && (selectedScanType === 'ct' || selectedScanType === 'mri') && (
+                    <div className="space-y-4">
+                      <Dialog open={showAnnotations} onOpenChange={setShowAnnotations}>
+                        <DialogTrigger asChild>
+                          <Button variant="outline" className="w-full gap-2">
+                            <MessageSquare className="w-4 h-4" />
+                            Open Collaborative Annotations
+                          </Button>
+                        </DialogTrigger>
+                        <DialogContent className="max-w-4xl">
+                          <DialogHeader>
+                            <DialogTitle>Collaborative Annotations</DialogTitle>
+                          </DialogHeader>
+                          <CollaborativeAnnotation 
+                            scanId={latestScanId || ''} 
+                            imageUrl={uploadedImage || undefined} 
+                          />
+                        </DialogContent>
+                      </Dialog>
+
+                      <Dialog open={showComparison} onOpenChange={setShowComparison}>
+                        <DialogTrigger asChild>
+                          <Button variant="outline" className="w-full gap-2">
+                            <ArrowLeftRight className="w-4 h-4" />
+                            Compare with Previous Scans
+                          </Button>
+                        </DialogTrigger>
+                        <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto">
+                          <DialogHeader>
+                            <DialogTitle>Scan Comparison</DialogTitle>
+                          </DialogHeader>
+                          {selectedPatient && (
+                            <ComparativeScanViewer 
+                              patientId={selectedPatient} 
+                              currentScanId={latestScanId || undefined}
+                            />
+                          )}
+                        </DialogContent>
+                      </Dialog>
+
+                      <Scan3DViewer scanType={selectedScanType} sliceCount={selectedScanType === 'ct' ? 64 : 48} />
                     </div>
                   )}
                 </>

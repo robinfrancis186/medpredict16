@@ -6,6 +6,9 @@ import { ClinicalDisclaimer } from '@/components/ClinicalDisclaimer';
 import { VitalsChart } from '@/components/VitalsChart';
 import { PatientLinkDialog } from '@/components/PatientLinkDialog';
 import { PatientEditDialog } from '@/components/PatientEditDialog';
+import { EnhancedLabPanel } from '@/components/EnhancedLabPanel';
+import { ComparativeScanViewer } from '@/components/ComparativeScanViewer';
+import { Scan3DViewer } from '@/components/Scan3DViewer';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { supabase } from '@/integrations/supabase/client';
@@ -32,6 +35,9 @@ import {
   Pencil,
   TrendingUp,
   Link2,
+  TestTube,
+  ArrowLeftRight,
+  Box,
 } from 'lucide-react';
 
 interface Patient {
@@ -448,7 +454,7 @@ export default function PatientDetail() {
 
         {/* Tabs */}
         <Tabs defaultValue="vitals" className="space-y-4">
-          <TabsList className="bg-muted/50 p-1">
+          <TabsList className="bg-muted/50 p-1 flex-wrap h-auto">
             <TabsTrigger value="vitals" className="gap-2">
               <Activity className="w-4 h-4" />
               Vitals
@@ -457,9 +463,21 @@ export default function PatientDetail() {
               <TrendingUp className="w-4 h-4" />
               Charts
             </TabsTrigger>
+            <TabsTrigger value="labs" className="gap-2">
+              <TestTube className="w-4 h-4" />
+              Lab Results
+            </TabsTrigger>
             <TabsTrigger value="scans" className="gap-2">
               <Scan className="w-4 h-4" />
               Scans
+            </TabsTrigger>
+            <TabsTrigger value="compare" className="gap-2">
+              <ArrowLeftRight className="w-4 h-4" />
+              Compare
+            </TabsTrigger>
+            <TabsTrigger value="3d" className="gap-2">
+              <Box className="w-4 h-4" />
+              3D View
             </TabsTrigger>
             <TabsTrigger value="records" className="gap-2">
               <FileText className="w-4 h-4" />
@@ -510,6 +528,11 @@ export default function PatientDetail() {
             <VitalsChart vitals={vitals} />
           </TabsContent>
 
+          {/* Lab Results Tab */}
+          <TabsContent value="labs" className="animate-fade-in">
+            {id && <EnhancedLabPanel patientId={id} />}
+          </TabsContent>
+
           {/* Scans Tab */}
           <TabsContent value="scans" className="animate-fade-in">
             {scans.length > 0 ? (
@@ -538,6 +561,19 @@ export default function PatientDetail() {
             ) : (
               <EmptyState icon={Scan} message="No scans available" />
             )}
+          </TabsContent>
+
+          {/* Compare Tab */}
+          <TabsContent value="compare" className="animate-fade-in">
+            {id && <ComparativeScanViewer patientId={id} />}
+          </TabsContent>
+
+          {/* 3D View Tab */}
+          <TabsContent value="3d" className="animate-fade-in">
+            <div className="grid md:grid-cols-2 gap-6">
+              <Scan3DViewer scanType="ct" sliceCount={64} />
+              <Scan3DViewer scanType="mri" sliceCount={48} />
+            </div>
           </TabsContent>
 
           {/* Records Tab */}
