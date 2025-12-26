@@ -15,6 +15,8 @@ import MedicalRecords from "./pages/MedicalRecords";
 import Appointments from "./pages/Appointments";
 import LabResults from "./pages/LabResults";
 import PatientPortal from "./pages/PatientPortal";
+import Prescriptions from "./pages/Prescriptions";
+import Insurance from "./pages/Insurance";
 import NotFound from "./pages/NotFound";
 import { Loader2 } from "lucide-react";
 
@@ -183,6 +185,22 @@ function AppRoutes() {
         element={
           <StaffRoute>
             <LabResults />
+          </StaffRoute>
+        }
+      />
+      <Route
+        path="/prescriptions"
+        element={
+          <StaffRoute>
+            <Prescriptions />
+          </StaffRoute>
+        }
+      />
+      <Route
+        path="/insurance"
+        element={
+          <StaffRoute>
+            <Insurance />
           </StaffRoute>
         }
       />

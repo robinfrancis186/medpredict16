@@ -21,6 +21,8 @@ import {
   TestTube,
   Stethoscope,
   UserCog,
+  Pill,
+  Shield,
 } from 'lucide-react';
 
 interface DashboardLayoutProps {
@@ -52,6 +54,8 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
     { name: 'Scan Analysis', href: '/analysis', icon: Scan, roles: ['doctor', 'nurse'] },
     { name: 'Vitals Monitor', href: '/vitals', icon: Activity, roles: ['doctor', 'nurse'] },
     { name: 'Lab Results', href: '/lab-results', icon: TestTube, roles: ['doctor', 'nurse'] },
+    { name: 'Prescriptions', href: '/prescriptions', icon: Pill, roles: ['doctor'] },
+    { name: 'Insurance', href: '/insurance', icon: Shield, roles: ['doctor', 'nurse'] },
     { name: 'Appointments', href: '/appointments', icon: Calendar, roles: ['doctor', 'nurse'] },
     { name: 'Records', href: '/records', icon: FileText, roles: ['doctor', 'nurse'] },
   ];
