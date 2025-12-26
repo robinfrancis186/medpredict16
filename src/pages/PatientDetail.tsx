@@ -15,6 +15,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { generateAnalysisReport, downloadPdf } from '@/lib/pdfGenerator';
 import { toast } from 'sonner';
+import { PatientPrescriptionHistory } from '@/components/PatientPrescriptionHistory';
 import {
   ArrowLeft,
   User,
@@ -38,6 +39,7 @@ import {
   TestTube,
   ArrowLeftRight,
   Box,
+  Pill,
 } from 'lucide-react';
 
 interface Patient {
@@ -479,6 +481,10 @@ export default function PatientDetail() {
               <Box className="w-4 h-4" />
               3D View
             </TabsTrigger>
+            <TabsTrigger value="prescriptions" className="gap-2">
+              <Pill className="w-4 h-4" />
+              Prescriptions
+            </TabsTrigger>
             <TabsTrigger value="records" className="gap-2">
               <FileText className="w-4 h-4" />
               Records
@@ -574,6 +580,11 @@ export default function PatientDetail() {
               <Scan3DViewer scanType="ct" sliceCount={64} />
               <Scan3DViewer scanType="mri" sliceCount={48} />
             </div>
+          </TabsContent>
+
+          {/* Prescriptions Tab */}
+          <TabsContent value="prescriptions" className="animate-fade-in">
+            {id && patient && <PatientPrescriptionHistory patientId={id} patientName={patient.name} />}
           </TabsContent>
 
           {/* Records Tab */}
